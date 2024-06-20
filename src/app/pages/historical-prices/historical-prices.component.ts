@@ -25,15 +25,7 @@ import { MatProgressSpinner } from "@angular/material/progress-spinner";
 import { FormsModule } from "@angular/forms";
 import { catchError, EMPTY, finalize, tap } from "rxjs";
 import { SnackbarService } from "../../services/common/snackbar.service";
-
-export interface HistoricalData {
-  t: string;
-  o: number;
-  h: number;
-  l: number;
-  c: number;
-  v: number;
-}
+import { HistoryDataItem } from "../../types/entity/history-data/history-data-item.entity";
 
 enum HistoricalDataTableColumns {
   Date = "Date",
@@ -74,7 +66,7 @@ enum HistoricalDataTableColumns {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HistoricalPricesComponent implements OnInit {
-  protected dataSource: HistoricalData[] = [];
+  protected dataSource: HistoryDataItem[] = [];
   protected columnNames = HistoricalDataTableColumns;
   protected columnsToDisplay = Object.values(HistoricalDataTableColumns);
   protected startDate: Date | null = null;

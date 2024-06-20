@@ -7,13 +7,15 @@ import { DatePipe, NgIf } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { RouterParams } from "../../constants/router-params";
 import { pathNames } from "../../pathnames";
-import { FinchartsDataService, Instrument, RealTimeResponse } from "../../services/api/finchartsData.service";
+import { FinchartsDataService } from "../../services/api/finchartsData.service";
 import { catchError, finalize, Subscription, tap } from "rxjs";
 import { SnackbarService } from "../../services/common/snackbar.service";
 import { WebSocketSubject } from "rxjs/internal/observable/dom/WebSocketSubject";
 import { NgApexchartsModule } from "ng-apexcharts";
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
 import { AppChartComponent } from "../../components/app-chart/app-chart.component";
+import { Instrument } from "../../types/entity/instrument/instrument.entity";
+import { RealTimeDataItem } from "../../types/entity/real-time-data/real-time-data-item.entity";
 
 @Component({
   selector: "app-home",
@@ -40,7 +42,7 @@ export class HomeComponent implements OnDestroy {
 
   protected isLoading = false;
   protected currentInstrument: Instrument | null = null;
-  protected subscriptionData: RealTimeResponse | null = null;
+  protected subscriptionData: RealTimeDataItem | null = null;
   private webSocketSubject: WebSocketSubject<any> | null = null;
   private webSocketSubscription: Subscription | null = null;
   private currentSubscription: string | null = null;
@@ -61,11 +63,12 @@ export class HomeComponent implements OnDestroy {
   protected setCurrentSubscription(symbol: string) {
     if (this.currentSubscription === symbol) return;
 
-    this.currentSubscription = symbol;
     if (this.appChartComponent) {
       this.appChartComponent.resetSeries();
     }
+
     this.stopWebSocketConnection();
+    this.currentSubscription = symbol;
     this.cdr.markForCheck();
 
     this.finchartsDataService
@@ -101,6 +104,7 @@ export class HomeComponent implements OnDestroy {
                 // @ts-ignore
                 this.appChartComponent.setChartSeries(updatedSeries);
               }
+
               this.cdr.markForCheck();
             },
             (err) => console.error("WebSocket error:", err),
@@ -110,16 +114,7 @@ export class HomeComponent implements OnDestroy {
             },
           );
 
-          const message = {
-            type: "l1-subscription",
-            id: "1",
-            instrumentId: instrument.id,
-            provider: "simulation",
-            subscribe: true,
-            kinds: ["last"],
-          };
-          this.webSocketSubject.next(message);
-
+          this.sendSubscriptionMessageToWebSocket(instrument);
           this.currentInstrument = instrument;
         }),
         catchError((error) => {
@@ -145,6 +140,18 @@ export class HomeComponent implements OnDestroy {
     this.router.navigate([historicalDataPathname], {
       queryParams: { [RouterParams.InstrumentID]: this.currentInstrument?.id },
     });
+  }
+
+  private sendSubscriptionMessageToWebSocket(instrument: Instrument) {
+    const message = {
+      type: "l1-subscription",
+      id: "1",
+      instrumentId: instrument.id,
+      provider: "simulation",
+      subscribe: true,
+      kinds: ["last"],
+    };
+    this.webSocketSubject?.next(message);
   }
 
   private stopWebSocketConnection = () => {

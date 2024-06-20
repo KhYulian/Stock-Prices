@@ -1,8 +1,5 @@
 import { Injectable } from "@angular/core";
-
-export enum LocalStorageKeys {
-  accessToken = "accessToken",
-}
+import { LocalStorageKeys } from "../../constants/locale.storage-keys";
 
 @Injectable({
   providedIn: "root",
