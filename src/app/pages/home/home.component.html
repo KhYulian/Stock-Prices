@@ -37,19 +37,7 @@
 <div *ngIf="currentInstrument" class="chart">
   <p class="chart__title">Charting data:</p>
   <div class="chart__bars">
-    <apx-chart
-      *ngIf="isChartCanBeShown"
-      [series]="series"
-      [chart]="chart"
-      [dataLabels]="dataLabels"
-      [markers]="markers"
-      [title]="title"
-      [fill]="fill"
-      [yaxis]="yaxis"
-      [xaxis]="xaxis"
-      [autoUpdateSeries]="true"
-      #chartComponent
-    ></apx-chart>
+    <app-chart />
   </div>
 
   <button (click)="navigateToHistoricalData()" mat-button class="chart__historical-data-btn">Historical Data</button>
@@ -60,5 +48,5 @@
 </div>
 
 <div *ngIf="isLoading" class="loader-container">
-  <mat-spinner></mat-spinner>
+  <mat-spinner />
 </div>

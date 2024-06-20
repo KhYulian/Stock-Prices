@@ -11,19 +11,9 @@ import { FinchartsDataService, Instrument, RealTimeResponse } from "../../servic
 import { catchError, finalize, Subscription, tap } from "rxjs";
 import { SnackbarService } from "../../services/common/snackbar.service";
 import { WebSocketSubject } from "rxjs/internal/observable/dom/WebSocketSubject";
-import {
-  ApexAxisChartSeries,
-  ApexChart,
-  ApexTitleSubtitle,
-  ApexDataLabels,
-  ApexFill,
-  ApexMarkers,
-  ApexYAxis,
-  ApexXAxis,
-  NgApexchartsModule,
-  ChartComponent,
-} from "ng-apexcharts";
+import { NgApexchartsModule } from "ng-apexcharts";
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
+import { AppChartComponent } from "../../components/app-chart/app-chart.component";
 
 @Component({
   selector: "app-home",
@@ -39,41 +29,21 @@ import { MatProgressSpinner } from "@angular/material/progress-spinner";
     DatePipe,
     NgApexchartsModule,
     MatProgressSpinner,
+    AppChartComponent,
   ],
   templateUrl: "./home.component.html",
   styleUrl: "./home.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeComponent implements OnDestroy {
-  @ViewChild("chartComponent") chartComponent!: ChartComponent;
+  @ViewChild(AppChartComponent) appChartComponent!: AppChartComponent;
 
-  public series!: ApexAxisChartSeries;
-  public chart!: ApexChart;
-  public dataLabels!: ApexDataLabels;
-  public markers!: ApexMarkers;
-  public title!: ApexTitleSubtitle;
-  public fill!: ApexFill;
-  public yaxis!: ApexYAxis;
-  public xaxis!: ApexXAxis;
-  protected currentSubscription: string | null = null;
-  protected currentInstrument: Instrument | null = null;
   protected isLoading = false;
+  protected currentInstrument: Instrument | null = null;
   protected subscriptionData: RealTimeResponse | null = null;
   private webSocketSubject: WebSocketSubject<any> | null = null;
   private webSocketSubscription: Subscription | null = null;
-
-  protected get isChartCanBeShown() {
-    return (
-      this.series &&
-      this.chart &&
-      this.dataLabels &&
-      this.markers &&
-      this.title &&
-      this.fill &&
-      this.xaxis &&
-      this.yaxis
-    );
-  }
+  private currentSubscription: string | null = null;
 
   constructor(
     private readonly cdr: ChangeDetectorRef,
@@ -81,7 +51,6 @@ export class HomeComponent implements OnDestroy {
     private readonly finchartsDataService: FinchartsDataService,
     private readonly snackbarService: SnackbarService,
   ) {
-    this.initChartData();
     this.cdr.markForCheck();
   }
 
@@ -89,67 +58,13 @@ export class HomeComponent implements OnDestroy {
     this.stopWebSocketConnection();
   }
 
-  public initChartData(): void {
-    let dates: any[] = [];
-
-    this.series = [
-      {
-        name: "",
-        data: dates as any,
-      },
-    ];
-    this.chart = {
-      type: "area",
-      stacked: false,
-      height: 350,
-      animations: {
-        enabled: false,
-      },
-    };
-    this.dataLabels = {
-      enabled: false,
-    };
-    this.markers = {
-      size: 0,
-    };
-    this.title = {
-      text: "Stock Price Movement",
-      align: "left",
-    };
-    this.fill = {
-      type: "gradient",
-      gradient: {
-        shadeIntensity: 1,
-        inverseColors: false,
-        opacityFrom: 0.5,
-        opacityTo: 0,
-        stops: [0, 90, 100],
-      },
-    };
-    this.yaxis = {
-      title: {
-        text: "Price",
-      },
-    };
-    this.xaxis = {
-      type: "datetime",
-
-      labels: {
-        format: "yyyy-d-M:HH:mm:ss",
-      },
-    };
-  }
-
   protected setCurrentSubscription(symbol: string) {
     if (this.currentSubscription === symbol) return;
 
     this.currentSubscription = symbol;
-    this.series = [
-      {
-        name: "",
-        data: [],
-      },
-    ];
+    if (this.appChartComponent) {
+      this.appChartComponent.resetSeries();
+    }
     this.stopWebSocketConnection();
     this.cdr.markForCheck();
 
@@ -173,20 +88,18 @@ export class HomeComponent implements OnDestroy {
               if (msg.type === "l1-update") {
                 const updatedSeries = [
                   {
-                    name: this.series[0]?.name ?? "",
-                    data: [...this.series[0].data, [new Date(msg.last.timestamp).getTime(), msg.last.price]],
+                    name: this.appChartComponent.series[0]?.name ?? "",
+                    data: [
+                      ...this.appChartComponent.series[0].data,
+                      [new Date(msg.last.timestamp).getTime(), msg.last.price],
+                    ],
                   },
                 ];
 
                 // @ts-ignore
                 this.series = updatedSeries;
-                this.chartComponent.updateSeries([
-                  {
-                    name: this.currentSubscription ?? "",
-                    // @ts-ignore
-                    data: updatedSeries,
-                  },
-                ]);
+                // @ts-ignore
+                this.appChartComponent.setChartSeries(updatedSeries);
               }
               this.cdr.markForCheck();
             },
