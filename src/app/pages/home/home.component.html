@@ -29,7 +29,10 @@
 
     <div class="market-data__value">
       <p>Time:</p>
-      <p>{{ subscriptionData?.last?.timestamp | date: "medium" ?? "-" }}</p>
+      <p>
+        {{ subscriptionData?.last?.timestamp | date: "medium"
+        }}<span *ngIf="!subscriptionData?.last?.timestamp">-</span>
+      </p>
     </div>
   </div>
 </div>

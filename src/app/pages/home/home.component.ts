@@ -86,9 +86,8 @@ export class HomeComponent implements OnDestroy {
 
           this.webSocketSubscription = this.webSocketSubject.subscribe(
             (msg) => {
-              this.subscriptionData = msg;
-
-              if (msg.type === "l1-update") {
+              if (msg?.type === "l1-update") {
+                this.subscriptionData = msg;
                 const updatedSeries = [
                   {
                     name: this.appChartComponent.series[0]?.name ?? "",
