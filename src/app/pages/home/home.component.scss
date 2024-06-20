@@ -1,0 +1,72 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+
+  & > * {
+    margin-bottom: 1rem;
+  }
+}
+
+.symbol {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  column-gap: 1rem;
+  margin-top: 2rem;
+
+  &__subscribe {
+    width: 160px;
+  }
+}
+
+.market-data {
+  &__title {
+    margin-bottom: 0.5rem;
+  }
+
+  .market-data__values {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0.5rem;
+    border: 1px solid black;
+    border-radius: 6px;
+  }
+
+  .market-data__value {
+    text-align: center;
+  }
+}
+
+.chart {
+  display: flex;
+  flex-direction: column;
+
+  &__title {
+    margin-bottom: 0.5rem;
+  }
+
+  &__bars {
+    height: 400px;
+    border: 1px solid black;
+    border-radius: 6px;
+  }
+
+  &__historical-data-btn {
+    margin-left: auto;
+    margin-top: 0.5rem;
+  }
+}
+
+.chart-empty-state {
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+.loader-container {
+  display: flex;
+  justify-content: center;
+}

@@ -1,0 +1,64 @@
+<div class="symbol">
+  <mat-form-field class="symbol__input full-width">
+    <mat-label>Symbol</mat-label>
+    <input
+      (keydown.enter)="setCurrentSubscription(symbolInput.value)"
+      matInput
+      placeholder="Enter symbol e.g. AAPL"
+      #symbolInput
+    />
+  </mat-form-field>
+
+  <button (click)="setCurrentSubscription(symbolInput.value)" mat-flat-button class="symbol__subscribe">
+    Subscribe
+  </button>
+</div>
+
+<div *ngIf="currentInstrument" class="market-data">
+  <p class="market-data__title">Market data:</p>
+  <div class="market-data__values">
+    <div class="market-data__value">
+      <p>Symbol:</p>
+      <p>{{ currentInstrument.symbol }}</p>
+    </div>
+
+    <div class="market-data__value">
+      <p>Price:</p>
+      <p>{{ subscriptionData?.last?.price ?? "-" }}</p>
+    </div>
+
+    <div class="market-data__value">
+      <p>Time:</p>
+      <p>{{ subscriptionData?.last?.timestamp | date: "medium" ?? "-" }}</p>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="currentInstrument" class="chart">
+  <p class="chart__title">Charting data:</p>
+  <div class="chart__bars">
+    <apx-chart
+      *ngIf="isChartCanBeShown"
+      [series]="series"
+      [chart]="chart"
+      [dataLabels]="dataLabels"
+      [markers]="markers"
+      [title]="title"
+      [fill]="fill"
+      [yaxis]="yaxis"
+      [xaxis]="xaxis"
+      [autoUpdateSeries]="true"
+      #chartComponent
+    ></apx-chart>
+  </div>
+
+  <button (click)="navigateToHistoricalData()" mat-button class="chart__historical-data-btn">Historical Data</button>
+</div>
+
+<div *ngIf="!currentInstrument" class="loader-container">
+  <p class="chart-empty-state">Please, start a subscription to see a chart</p>
+</div>
+
+<div *ngIf="isLoading" class="loader-container">
+  <mat-spinner></mat-spinner>
+</div>

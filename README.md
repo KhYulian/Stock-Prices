@@ -1,4 +1,6 @@
-# Client
+# Magnise Test Task
+
+**Set environent variables in environments/environment.ts or environments/environment.development.ts to work with the application!**
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.0.4.
 

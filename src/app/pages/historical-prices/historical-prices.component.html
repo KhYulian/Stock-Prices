@@ -1,0 +1,86 @@
+<button (click)="goBack()" mat-button>Go Back</button>
+
+<div class="header">
+  <h4>
+    Historical Prices for <strong>{{ currentSymbol }}</strong>
+  </h4>
+</div>
+
+<div class="search">
+  <mat-form-field>
+    <mat-label>Enter a date range</mat-label>
+    <mat-date-range-input [rangePicker]="picker">
+      <input matStartDate [(ngModel)]="startDate" placeholder="Start date" />
+      <input matEndDate [(ngModel)]="endDate" placeholder="End date" />
+    </mat-date-range-input>
+    <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
+    <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-date-range-picker #picker></mat-date-range-picker>
+  </mat-form-field>
+
+  <button (click)="onSearch()" [disabled]="!startDate" mat-flat-button>Search</button>
+</div>
+
+<div class="table-wrapper">
+  <table *ngIf="!isLoading; else loader" mat-table [dataSource]="dataSource" class="table">
+    <!-- Date Column -->
+    <ng-container [matColumnDef]="columnNames.Date">
+      <th mat-header-cell *matHeaderCellDef>Date</th>
+      <td mat-cell *matCellDef="let item">
+        {{ item.t | date: "mediumDate" }}
+      </td>
+    </ng-container>
+
+    <!-- Open Column -->
+    <ng-container [matColumnDef]="columnNames.Open">
+      <th mat-header-cell *matHeaderCellDef>Open</th>
+      <td mat-cell *matCellDef="let item">
+        {{ item.o }}
+      </td>
+    </ng-container>
+
+    <!-- High Column -->
+    <ng-container [matColumnDef]="columnNames.High">
+      <th mat-header-cell *matHeaderCellDef>High</th>
+      <td mat-cell *matCellDef="let item">
+        {{ item.h }}
+      </td>
+    </ng-container>
+
+    <!-- Low Column -->
+    <ng-container [matColumnDef]="columnNames.Low">
+      <th mat-header-cell *matHeaderCellDef>Low</th>
+      <td mat-cell *matCellDef="let item">
+        {{ item.l }}
+      </td>
+    </ng-container>
+
+    <!-- Close Column -->
+    <ng-container [matColumnDef]="columnNames.Close">
+      <th mat-header-cell *matHeaderCellDef>Close</th>
+      <td mat-cell *matCellDef="let item">
+        {{ item.c }}
+      </td>
+    </ng-container>
+
+    <!-- Volume Column -->
+    <ng-container [matColumnDef]="columnNames.Volume">
+      <th mat-header-cell *matHeaderCellDef>Volume</th>
+      <td mat-cell *matCellDef="let item">
+        {{ item.v }}
+      </td>
+    </ng-container>
+
+    <tr class="mat-row" *matNoDataRow>
+      <td class="mat-cell" [attr.colspan]="columnsToDisplay.length">
+        <p class="empty-state">No data matching the filter.</p>
+      </td>
+    </tr>
+
+    <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+    <tr mat-row *matRowDef="let row; columns: columnsToDisplay"></tr>
+  </table>
+  <ng-template #loader>
+    <mat-spinner [diameter]="50" class="loader"></mat-spinner>
+  </ng-template>
+</div>

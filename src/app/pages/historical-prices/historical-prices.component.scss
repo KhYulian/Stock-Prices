@@ -1,0 +1,41 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  height: 100%;
+  max-width: 800px;
+  margin: 2rem auto auto;
+
+  & > * {
+    margin-bottom: 1rem;
+  }
+}
+
+.header {
+  margin-bottom: 1rem;
+}
+
+.search {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.table-wrapper {
+  position: relative;
+  width: 100%;
+  min-height: 200px;
+}
+
+.empty-state {
+  text-align: center;
+  margin: 1rem 0;
+}
+
+.loader {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
