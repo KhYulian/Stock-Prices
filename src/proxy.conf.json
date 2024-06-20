@@ -6,13 +6,5 @@
     "pathRewrite": {
       "^/api": ""
     }
-  },
-  "/ws": {
-    "target": "wss://platform.fintacharts.com",
-    "secure": false,
-    "changeOrigin": true,
-    "pathRewrite": {
-      "^/ws": ""
-    }
   }
 }
