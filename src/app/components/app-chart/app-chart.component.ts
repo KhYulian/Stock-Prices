@@ -94,7 +94,7 @@ export class AppChartComponent {
       type: "datetime",
 
       labels: {
-        format: "yyyy-d-M:HH:mm:ss",
+        format: "HH:mm:ss",
       },
     };
   }
