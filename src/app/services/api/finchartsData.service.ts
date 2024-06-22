@@ -18,15 +18,12 @@ import { RealTimeDataItem } from "../../types/entity/real-time-data/real-time-da
 export class FinchartsDataService {
   private isRefreshing = false;
   private refreshTokenSubject = new BehaviorSubject<null | string>(null);
-  private accessToken: string | null = null;
   private baseWsUrl = environment.FINCHARTS_WS_URI;
 
   constructor(
     private readonly http: HttpClient,
     private readonly localStorageService: LocalStorageService,
-  ) {
-    this.setTokenFromLocalStorage();
-  }
+  ) {}
 
   public getToken() {
     const headers = new HttpHeaders({
@@ -50,7 +47,6 @@ export class FinchartsDataService {
       })
       .pipe(
         tap((response) => {
-          this.accessToken = response.access_token;
           this.localStorageService.setItem(LocalStorageKeys.accessToken, response.access_token);
         }),
       );
@@ -58,9 +54,8 @@ export class FinchartsDataService {
 
   public getInstrument(symbol: string) {
     const params = new HttpParams().set("symbol", symbol).set("provider", "simulation");
-    const headers = this.getAuthorizationHeader();
 
-    return this.http.get<GetInstrumentsResponse>("/api/api/instruments/v1/instruments", { params, headers }).pipe(
+    return this.http.get<GetInstrumentsResponse>("/api/api/instruments/v1/instruments", { params }).pipe(
       switchMap((response) => {
         return this.processResponse(response);
       }),
@@ -75,7 +70,6 @@ export class FinchartsDataService {
   }
 
   public gatDateRange(instrumentId: string, startDate: string, endDate: string | null | undefined) {
-    const headers = this.getAuthorizationHeader();
     let params = new HttpParams()
       .set("instrumentId", instrumentId)
       .set("startDate", startDate)
@@ -86,15 +80,14 @@ export class FinchartsDataService {
       params = params.set("endDate", endDate);
     }
 
-    return this.http.get<GetHistoryDataResponse>("/api/api/bars/v1/bars/date-range", { params, headers }).pipe(
+    return this.http.get<GetHistoryDataResponse>("/api/api/bars/v1/bars/date-range", { params }).pipe(
       retry({
         count: 1,
         delay: (error, retryCount) => {
           if (error.status === 401) {
             return this.getToken().pipe(
               switchMap((token) => {
-                const headers = this.getAuthorizationHeader();
-                return this.http.get<GetHistoryDataResponse>("/api/api/bars/v1/bars/date-range", { params, headers });
+                return this.http.get<GetHistoryDataResponse>("/api/api/bars/v1/bars/date-range", { params });
               }),
             );
           }
@@ -105,7 +98,8 @@ export class FinchartsDataService {
   }
 
   public getWebSocketSubjectForRealTime() {
-    return this.createWebSocketSubject(`${this.baseWsUrl}/api/streaming/ws/v1/realtime?token=${this.accessToken}`);
+    const accessToken = this.localStorageService.getItem(LocalStorageKeys.accessToken);
+    return this.createWebSocketSubject(`${this.baseWsUrl}/api/streaming/ws/v1/realtime?token=${accessToken}`);
   }
 
   private createWebSocketSubject = (url: string): WebSocketSubject<RealTimeDataItem> => {
@@ -139,9 +133,8 @@ export class FinchartsDataService {
 
   private getInstrumentWithNewToken(symbol: string, token: string | null): Observable<any> {
     const params = new HttpParams().set("symbol", symbol);
-    const headers = this.getAuthorizationHeader();
 
-    return this.http.get<GetInstrumentsResponse>("/api/api/instruments/v1/instruments", { params, headers }).pipe(
+    return this.http.get<GetInstrumentsResponse>("/api/api/instruments/v1/instruments", { params }).pipe(
       switchMap((response) => {
         return this.processResponse(response);
       }),
@@ -153,13 +146,5 @@ export class FinchartsDataService {
       observer.next(response.data[0]);
       observer.complete();
     });
-  }
-
-  private setTokenFromLocalStorage() {
-    this.accessToken = this.localStorageService.getItem(LocalStorageKeys.accessToken);
-  }
-
-  private getAuthorizationHeader() {
-    return new HttpHeaders().set("Authorization", `Bearer ${this.accessToken}`);
   }
 }
