@@ -52,18 +52,20 @@ export class FinchartsDataService {
     const params = new HttpParams().set("symbol", symbol).set("provider", "simulation");
     const requestUrl = `/api/api/instruments/v1/instruments`;
 
-    return this.http.get<GetInstrumentsResponse>(requestUrl, { params }).pipe(
+    const requestObservable$ = this.http.get<GetInstrumentsResponse>(requestUrl, { params }).pipe(
+      map((response) => {
+        return response.data[0];
+      }),
+    );
+
+    return requestObservable$.pipe(
       retry({
         delay: (error) => {
           if (error.status !== 401) throw error;
 
           return this.getToken().pipe(
             switchMap(() => {
-              return this.http.get<GetInstrumentsResponse>(requestUrl, { params }).pipe(
-                map((response) => {
-                  return response.data[0];
-                }),
-              );
+              return requestObservable$;
             }),
           );
         },

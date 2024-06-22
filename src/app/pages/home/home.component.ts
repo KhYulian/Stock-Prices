@@ -61,7 +61,7 @@ export class HomeComponent implements OnDestroy {
   }
 
   protected setCurrentSubscription(symbol: string) {
-    if (this.currentSubscription === symbol) return;
+    if (!symbol || this.currentSubscription === symbol) return;
 
     if (this.appChartComponent) {
       this.appChartComponent.resetSeries();
